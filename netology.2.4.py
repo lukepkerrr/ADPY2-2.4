@@ -1,11 +1,11 @@
 import csv
 import re
+import datetime
 
 from pymongo import MongoClient
 
 client = MongoClient()
 concerts_db = client.concerts_db
-
 
 
 def read_data(csv_file, db):
@@ -19,11 +19,12 @@ def read_data(csv_file, db):
         csv_list = list(reader)
         csv_list.pop(0)
         for line in csv_list:
+            date = line[3].split('.')
             data.append({
                 'artist': line[0],
                 'price': int(line[1]),
                 'place': line[2],
-                'date': line[3]
+                'date': datetime.datetime(year=2019, month=int(date[1]), day=int(date[0]))
             })
         db.concerts.insert_many(data)
 
@@ -52,7 +53,21 @@ def find_by_name(name, db):
         print(concert)
 
 
+def find_by_date(start, end, db):
+    start_date = start.split('.')
+    end_date = end.split('.')
+
+    concerts_by_date = db.concerts.find({'$and': [
+        {'date': {'$gte': datetime.datetime(year=2019, month=int(start_date[1]), day=int(start_date[0]))}},
+        {'date': {'$lte': datetime.datetime(year=2019, month=int(end_date[1]), day=int(end_date[0]))}}
+    ]})
+    for concert in concerts_by_date:
+        print(concert)
+
+
 if __name__ == '__main__':
+    pass
     # read_data('artists.csv', concerts_db)
     # find_cheapest(concerts_db)
-    find_by_name('ов', concerts_db)
+    # find_by_name('ов', concerts_db)
+    # find_by_date('01.07', '30.07', concerts_db)
