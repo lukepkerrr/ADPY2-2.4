@@ -15,15 +15,13 @@ def read_data(csv_file, db):
     with open(csv_file, encoding='utf8') as csvfile:
         # прочитать файл с данными и записать в коллекцию
         data = []
-        reader = csv.reader(csvfile)
-        csv_list = list(reader)
-        csv_list.pop(0)
-        for line in csv_list:
-            date = line[3].split('.')
+        reader = csv.DictReader(csvfile)
+        for line in reader:
+            date = line['Дата'].split('.')
             data.append({
-                'artist': line[0],
-                'price': int(line[1]),
-                'place': line[2],
+                'artist': line['Исполнитель'],
+                'price': int(line['Цена']),
+                'place': line['Место'],
                 'date': datetime.datetime(year=2019, month=int(date[1]), day=int(date[0]))
             })
         db.concerts.insert_many(data)
@@ -45,8 +43,15 @@ def find_by_name(name, db):
     Найти билеты по имени исполнителя (в том числе – по подстроке),
     и выведите их по возрастанию цены
     """
+    symbols_for_replace = ['.', '^', '$', '*', '+', '?']
 
+    for symbol in symbols_for_replace:
+        name = name.replace(symbol, '\{}'.format(symbol))
+    
+    print('.*{}.*'.format(name))
     regex = re.compile('.*{}.*'.format(name))
+
+    print(regex)
 
     concerts_by_name = db.concerts.find({'artist': regex}).sort('price', 1)
     for concert in concerts_by_name:
@@ -66,8 +71,8 @@ def find_by_date(start, end, db):
 
 
 if __name__ == '__main__':
-    pass
+
     # read_data('artists.csv', concerts_db)
     # find_cheapest(concerts_db)
-    # find_by_name('ов', concerts_db)
-    # find_by_date('01.07', '30.07', concerts_db)
+    find_by_name('i.am', concerts_db)
+    #find_by_date('01.07', '30.07', concerts_db)
