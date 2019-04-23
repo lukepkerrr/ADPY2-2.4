@@ -43,15 +43,8 @@ def find_by_name(name, db):
     Найти билеты по имени исполнителя (в том числе – по подстроке),
     и выведите их по возрастанию цены
     """
-    symbols_for_replace = ['.', '^', '$', '*', '+', '?']
 
-    for symbol in symbols_for_replace:
-        name = name.replace(symbol, '\{}'.format(symbol))
-    
-    print('.*{}.*'.format(name))
-    regex = re.compile('.*{}.*'.format(name))
-
-    print(regex)
+    regex = re.compile('.*{}.*'.format(re.escape(name)))
 
     concerts_by_name = db.concerts.find({'artist': regex}).sort('price', 1)
     for concert in concerts_by_name:
@@ -74,5 +67,5 @@ if __name__ == '__main__':
 
     # read_data('artists.csv', concerts_db)
     # find_cheapest(concerts_db)
-    find_by_name('i.am', concerts_db)
+    find_by_name('ов', concerts_db)
     #find_by_date('01.07', '30.07', concerts_db)
